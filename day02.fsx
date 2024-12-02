@@ -38,3 +38,28 @@ let part1 filename =
     |> parseFile
     |> Seq.choose isSafe
     |> Seq.length
+
+
+// Part 2
+
+let isSafe2 report =
+    let lst = report |> List.ofSeq
+    let safe =
+        lst
+        |> List.ofSeq
+        |> List.mapi (fun i _ ->
+            lst
+            |> List.indexed
+            |> List.filter (fun (idx, _) -> idx <> i)
+            |> List.map snd
+            |> isSafe)
+        |> List.choose id
+        |> List.length
+
+    if safe > 0 then Some report else None
+
+let part2 filename =
+    filename
+    |> parseFile
+    |> Seq.choose isSafe2
+    |> Seq.length
