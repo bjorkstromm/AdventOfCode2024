@@ -58,3 +58,22 @@ let part1 filename =
     |> List.filter (isValid rules)
     |> List.map (fun update -> update.[update.Length / 2])
     |> List.sum
+
+
+// Part 2
+let sort rules update =
+    update
+    |> Array.sortWith (fun a b ->
+        if Set.contains (b, a) rules then 1
+        else if Set.contains (a, b) rules then -1
+        else 0)
+
+
+let part2 filename =
+    let (rules, updates) = parseFile filename
+
+    updates
+    |> List.filter (not << isValid rules)
+    |> List.map (sort rules)
+    |> List.map (fun update -> update.[update.Length / 2])
+    |> List.sum
