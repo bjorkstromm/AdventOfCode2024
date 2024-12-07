@@ -6,6 +6,7 @@ type Equation = {
 type Operator =
     | Add
     | Multiply
+    | Concatenate // Part 2
 
 let parseEquation (line : string) =
     let tokens = line.Split(':', 2, System.StringSplitOptions.RemoveEmptyEntries)
@@ -49,5 +50,39 @@ let solve equation =
 let part1 filename =
     parseFile filename
     |> Seq.map solve
+    |> Seq.choose id
+    |> Seq.sumBy (fun (equation, _) -> equation.Result)
+
+
+// Part 2
+
+let solve2 equation =
+    let rec loop (res, operations) numbers =
+        match numbers with
+        | [] when res = equation.Result -> [Some (operations |> List.rev)]
+        | [] -> [None]
+        | x :: tail when res <= equation.Result ->
+            let add = loop (res + x, Add :: operations) tail
+            let multiply = loop (res * x, Multiply :: operations) tail
+            let concatenate = loop (System.Int64.Parse(string res + string x), Concatenate :: operations) tail
+            add @ multiply @ concatenate
+        | _ -> [None]
+
+    let res =
+        equation.Numbers
+        |> List.head
+
+    let operations =
+        equation.Numbers
+        |> List.tail
+        |> loop (res, [])
+        |> List.choose id
+
+    if operations = [] then None
+    else Some (equation, operations)
+
+let part2 filename =
+    parseFile filename
+    |> Seq.map solve2
     |> Seq.choose id
     |> Seq.sumBy (fun (equation, _) -> equation.Result)
